@@ -17,8 +17,9 @@ h1 {
    Grille du menu
 ================================= */
 #menu {
-  justify-items: center; /* centre le contenu de chaque cellule horizontalement */
-  align-items: start;   /* position verticale du contenu dans la cellule */
+    display: inline-grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* responsive */
+    gap: 20px;
 }
 
 /* ===============================
@@ -106,6 +107,7 @@ h1 {
     font-size: 28px;
     font-weight: bold;
 }
+
 
 
 
