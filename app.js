@@ -9,17 +9,19 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 function displayMenu(dishes) {
 
     const container = document.getElementById("menu");
+
     container.innerHTML = "";
 
     dishes.forEach(dish => {
 
         const card = document.createElement("div");
+
         card.className = "card";
 
         card.innerHTML = `
-            <img src="${dish.image_url}" alt="${dish.name}">
-            <h3>${dish.name}</h3>
-            <p>${dish.price} €</p>
+        <img src="${dish.image_url}">
+        <h3>${dish.name}</h3>
+        <p>${dish.price} €</p>
         `;
 
         card.addEventListener("click", () => {
@@ -48,12 +50,13 @@ function showMainMenu() {
     currentLevel = "menu";
 
     const nav = document.getElementById("navigation");
+
     const container = document.getElementById("menu");
 
     nav.innerHTML = "";
     container.innerHTML = "";
 
-    const categories = ["entree", "plat", "dessert", "boisson"];
+    const categories = ["entree","plat","dessert","boisson"];
 
     categories.forEach(cat => {
 
@@ -79,21 +82,12 @@ async function showSubcategories(category) {
 
     currentLevel = "subcategory";
 
-    const { data, error } = await client
-        .from("dishes")
-        .select("subcategory")
-        .eq("category", category);
+    const { data } = await client
+    .from("dishes")
+    .select("subcategory")
+    .eq("category", category);
 
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    const unique = [...new Set(
-        data
-        .map(d => d.subcategory)
-        .filter(sub => sub)
-    )];
+    const unique = [...new Set(data.map(d => d.subcategory))];
 
     const container = document.getElementById("menu");
 
@@ -123,16 +117,11 @@ async function showDishes(category, subcategory) {
 
     currentLevel = "dishes";
 
-    const { data, error } = await client
-        .from("dishes")
-        .select("*")
-        .eq("category", category)
-        .eq("subcategory", subcategory);
-
-    if (error) {
-        console.error(error);
-        return;
-    }
+    const { data } = await client
+    .from("dishes")
+    .select("*")
+    .eq("category", category)
+    .eq("subcategory", subcategory);
 
     displayMenu(data);
 
@@ -140,13 +129,13 @@ async function showDishes(category, subcategory) {
 
 document.getElementById("back-button").onclick = () => {
 
-    if (currentLevel === "dishes") {
+    if(currentLevel === "dishes"){
 
         showSubcategories(selectedCategory);
 
     }
 
-    else if (currentLevel === "subcategory") {
+    else if(currentLevel === "subcategory"){
 
         showMainMenu();
 
