@@ -1,3 +1,5 @@
+let currentLevel = "menu";
+let selectedCategory = null;
 const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
 
@@ -57,4 +59,5 @@ function displayMenu(dishes) {
 }
 
 // Charger le menu au démarrage
+
 loadMenu();
