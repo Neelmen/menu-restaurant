@@ -80,6 +80,8 @@ function showMainMenu() {
 
 async function showSubcategories(category) {
 
+    console.log(data);
+
     currentLevel = "subcategory";
 
     const { data } = await client
@@ -162,3 +164,4 @@ detailContent.forEach(el => {
 });
 
 showMainMenu();
+
