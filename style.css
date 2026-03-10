@@ -40,7 +40,6 @@ h1 {
 /* Sous menu */
 
 #menu button {
-
     width: 220px;
     padding: 15px;
     font-size: 18px;
@@ -140,3 +139,4 @@ h1 {
     font-weight: bold;
     cursor: pointer;
 }
+
