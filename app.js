@@ -57,7 +57,84 @@ function displayMenu(dishes) {
         el.addEventListener("click", e => e.stopPropagation());
     });
 }
+function showMainMenu() {
+
+    const nav = document.getElementById("navigation");
+    const container = document.getElementById("menu");
+
+    nav.innerHTML = "";
+    container.innerHTML = "";
+
+    const categories = ["entree", "plat", "dessert", "boisson"];
+
+    categories.forEach(cat => {
+
+        const btn = document.createElement("button");
+        btn.textContent = cat.toUpperCase();
+
+        btn.onclick = () => {
+            selectedCategory = cat;
+            showSubcategories(cat);
+        };
+
+        nav.appendChild(btn);
+    });
+
+}
+async function showSubcategories(category) {
+
+    currentLevel = "subcategory";
+
+    const { data } = await client
+        .from("dishes")
+        .select("subcategory")
+        .eq("category", category);
+
+    const unique = [...new Set(data.map(d => d.subcategory))];
+
+    const container = document.getElementById("menu");
+    container.innerHTML = "";
+
+    unique.forEach(sub => {
+
+        const btn = document.createElement("button");
+        btn.textContent = sub.toUpperCase();
+
+        btn.onclick = () => {
+            showDishes(category, sub);
+        };
+
+        container.appendChild(btn);
+    });
+
+    document.getElementById("back-button").classList.remove("hidden");
+
+}
+async function showDishes(category, subcategory) {
+
+    currentLevel = "dishes";
+
+    const { data } = await client
+        .from("dishes")
+        .select("*")
+        .eq("category", category)
+        .eq("subcategory", subcategory);
+
+    displayMenu(data);
+}
+document.getElementById("back-button").onclick = () => {
+
+    if (currentLevel === "dishes") {
+        showSubcategories(selectedCategory);
+    }
+    else if (currentLevel === "subcategory") {
+        showMainMenu();
+        document.getElementById("back-button").classList.add("hidden");
+    }
+
+};
 
 // Charger le menu au démarrage
 
-loadMenu();
+showMainMenu();
+
