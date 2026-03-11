@@ -1,3 +1,4 @@
+console.log("APP JS CHARGÉ");
 // ================================
 // app.js - Menu digital
 // ================================
@@ -162,4 +163,5 @@ detailContent.forEach(el => {
 document.addEventListener("DOMContentLoaded", () => {
     showMainMenu();
 });
+
 
