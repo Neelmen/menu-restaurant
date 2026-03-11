@@ -1,4 +1,4 @@
-console.log("APP JS CHARGÉ");
+console.log("SUPABASE CONNECTÉ");
 // ================================
 // app.js - Menu digital
 // ================================
@@ -163,5 +163,6 @@ detailContent.forEach(el => {
 document.addEventListener("DOMContentLoaded", () => {
     showMainMenu();
 });
+
 
 
