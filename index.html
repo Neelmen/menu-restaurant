@@ -2,48 +2,47 @@
 <html lang="fr">
 
 <head>
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Menu du restaurant</title>
+    <title>Menu du restaurant</title>
 
-<link rel="stylesheet" href="style.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Feuille de style -->
+    <link rel="stylesheet" href="style.css">
 
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
-<h1>Menu</h1>
+    <h1>Menu</h1>
 
-<div id="navigation"></div>
+    <!-- Navigation principale : catégories -->
+    <div id="navigation"></div>
 
-<div id="back-button" class="hidden">← Retour</div>
+    <!-- Bouton retour -->
+    <div id="back-button" class="hidden">← Retour</div>
 
-<div id="menu"></div>
+    <!-- Conteneur des sous-menus et cartes de plats -->
+    <div id="menu"></div>
 
-<div id="dish-detail" class="hidden">
+    <!-- Fiche détaillée du plat -->
+    <div id="dish-detail" class="hidden">
+        <img id="detail-image" src="" alt="">
+        <h2 id="detail-name"></h2>
+        <p id="detail-price"></p>
+        <p id="detail-description"></p>
+        <p id="detail-ingredients"></p>
+        <p id="detail-allergens"></p>
+    </div>
 
-<img id="detail-image" src="" alt="">
-
-<h2 id="detail-name"></h2>
-
-<p id="detail-price"></p>
-
-<p id="detail-description"></p>
-
-<p id="detail-ingredients"></p>
-
-<p id="detail-allergens"></p>
-
-</div>
-
-<script src="app.js"></script>
+    <!-- JS de l'application -->
+    <script src="app.js"></script>
 
 </body>
 
 </html>
-
-
