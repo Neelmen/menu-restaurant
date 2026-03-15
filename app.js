@@ -1,3 +1,7 @@
+// ===============================
+// app.js complet
+// ===============================
+
 const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
 
@@ -5,7 +9,7 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 console.log("APP JS CHARGÉ");
 
-// S’assure que le DOM est prêt
+// ======= DOM READY =======
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM prêt");
   document.getElementById("admin-panel")?.style.setProperty("display", "none");
@@ -24,7 +28,7 @@ async function checkSession() {
     loadDishes();
   } else {
     console.log("Pas de session active, chargement test des plats quand même...");
-    loadDishes(); // Pour test sur PC sans session
+    loadDishes(); // Permet de tester même sans login
   }
 }
 
@@ -109,29 +113,57 @@ async function loadDishes() {
       div.style.background = dish.available ? "#fff" : "#ffe5e5";
       div.style.textAlign = "center";
 
+      // Contenu texte
       div.innerHTML = `
-        <div style="margin-bottom:10px;">
-          <strong>${dish.name}</strong> - ${dish.price}€
-        </div>
-        <div style="margin-bottom:10px;">
-          ${dish.category} ${dish.subcategory ? "- " + dish.subcategory : ""}
-        </div>
+        <div style="margin-bottom:10px;"><strong>${dish.name}</strong> - ${dish.price}€</div>
+        <div style="margin-bottom:10px;">${dish.category} ${dish.subcategory ? "- " + dish.subcategory : ""}</div>
         <div style="margin-bottom:10px;">${dish.description || ""}</div>
         <div style="margin-bottom:10px;"><i>${dish.ingredients || ""}</i></div>
-        ${
-          dish.image_url
-            ? `<img src="${dish.image_url}" alt="${dish.name}" style="width:220px; max-width:100%; border-radius:10px; display:block; margin:0 auto;">`
-            : "<p style='color:#999'>Pas d'image</p>"
-        }
-        <div style="margin-top:12px;">
-          <button onclick="toggleDish('${dish.id}', ${dish.available})">
-            ${dish.available ? "Désactiver" : "Activer"}
-          </button>
-          <button onclick="editDish('${dish.id}')">Modifier</button>
-          <button onclick="deleteDish('${dish.id}')">Supprimer</button>
-        </div>
       `;
 
+      // Image
+      if (dish.image_url) {
+        const img = document.createElement("img");
+        img.src = dish.image_url;
+        img.alt = dish.name;
+        img.style.width = "220px";
+        img.style.maxWidth = "100%";
+        img.style.borderRadius = "10px";
+        img.style.display = "block";
+        img.style.margin = "0 auto 10px auto";
+        div.appendChild(img);
+      } else {
+        const p = document.createElement("p");
+        p.textContent = "Pas d'image";
+        p.style.color = "#999";
+        div.appendChild(p);
+      }
+
+      // Boutons actions
+      const btnContainer = document.createElement("div");
+      btnContainer.style.marginTop = "12px";
+
+      // Activer/Désactiver
+      const toggleBtn = document.createElement("button");
+      toggleBtn.textContent = dish.available ? "Désactiver" : "Activer";
+      toggleBtn.addEventListener("click", () => toggleDish(dish.id, dish.available));
+      btnContainer.appendChild(toggleBtn);
+
+      // Modifier
+      const editBtn = document.createElement("button");
+      editBtn.textContent = "Modifier";
+      editBtn.style.marginLeft = "5px";
+      editBtn.addEventListener("click", () => editDish(dish.id));
+      btnContainer.appendChild(editBtn);
+
+      // Supprimer
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Supprimer";
+      deleteBtn.style.marginLeft = "5px";
+      deleteBtn.addEventListener("click", () => deleteDish(dish.id));
+      btnContainer.appendChild(deleteBtn);
+
+      div.appendChild(btnContainer);
       container.appendChild(div);
     });
 
