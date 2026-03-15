@@ -1,270 +1,229 @@
-// ================================
-// app.js - Menu digital optimisé
-// ================================
-console.log("APP JS CHARGÉ");
-
 const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
+
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const cache = {};
-let currentCategory = null;
+console.log("APP JS CHARGÉ");
 
-// ================================
-// Helpers image
-// ================================
-function createDishImage(src, altText = "Image du plat") {
-    if (!src || typeof src !== "string" || !src.trim()) {
-        return null;
-    }
+// S’assure que le DOM est prêt
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM prêt");
+  document.getElementById("admin-panel")?.style.setProperty("display", "none");
+  document.getElementById("login-section")?.style.setProperty("display", "block");
+  checkSession();
+});
 
-    const img = document.createElement("img");
-    img.loading = "lazy";
-    img.src = src.trim();
-    img.alt = altText;
-    img.className = "dish-image";
+// ======= SESSION =======
+async function checkSession() {
+  const { data } = await client.auth.getSession();
+  console.log("Session :", data.session);
 
-    img.onerror = function () {
-        console.warn("Image introuvable ou non chargeable :", src);
-        this.style.display = "none";
-    };
-
-    img.addEventListener("click", (e) => {
-        e.stopPropagation();
-        showFullscreenImage(src.trim());
-    });
-
-    return img;
+  if (data.session) {
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("admin-panel")?.style.setProperty("display", "block");
+    loadDishes();
+  } else {
+    console.log("Pas de session active, chargement test des plats quand même...");
+    loadDishes(); // Pour test sur PC sans session
+  }
 }
 
-// ================================
-// Affiche la catégorie sélectionnée
-// ================================
-async function showCategory(category) {
-    currentCategory = category;
+async function loginAdmin() {
+  const email = document.getElementById("admin-email").value;
+  const password = document.getElementById("admin-password").value;
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+  const { error } = await client.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    document.getElementById("login-message").innerText = "Erreur : " + error.message;
+  } else {
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("admin-panel").style.display = "block";
+    loadDishes();
+  }
+}
+
+async function logoutAdmin() {
+  await client.auth.signOut();
+  location.reload();
+}
+
+// ======= UPLOAD IMAGE =======
+async function uploadImage(file) {
+  const fileExt = file.name.split(".").pop();
+  const fileName = Date.now() + "." + fileExt;
+
+  const { error } = await client.storage
+    .from("dishes-images")
+    .upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type
     });
 
-    const container = document.getElementById("menu");
-    container.innerHTML = "";
+  if (error) {
+    alert("Erreur upload : " + error.message);
+    return null;
+  }
 
-    const navButtons = document.querySelectorAll("#navigation button");
-    navButtons.forEach(btn => {
-        btn.classList.remove("active");
-        if (btn.textContent.toLowerCase() === category) {
-            btn.classList.add("active");
-        }
-    });
+  const { data } = client.storage.from("dishes-images").getPublicUrl(fileName);
+  return data.publicUrl;
+}
 
-    document.getElementById("back-button").classList.remove("hidden");
+// ======= LOAD DISHES =======
+async function loadDishes() {
+  const container = document.getElementById("dish-list");
+  if (!container) {
+    console.error("#dish-list introuvable dans le DOM !");
+    return;
+  }
 
-    if (cache[category]) {
-        displayCategory(cache[category]);
-        return;
-    }
-
+  try {
     const { data, error } = await client
-        .from("dishes")
-        .select("*")
-        .eq("category", category)
-        .eq("available", true)
-        .order("subcategory", { ascending: true })
-        .order("name", { ascending: true });
+      .from("dishes")
+      .select("*")
+      .order("available", { ascending: false })
+      .order("category", { ascending: true })
+      .order("subcategory", { ascending: true })
+      .order("name", { ascending: true });
 
-    if (error) {
-        console.error("Erreur Supabase:", error);
-        container.innerHTML = "<p>Erreur lors du chargement de la carte.</p>";
-        return;
-    }
+    if (error) throw error;
 
-    const grouped = {};
-    data.forEach(dish => {
-        const sub = dish.subcategory && dish.subcategory.trim()
-            ? dish.subcategory.trim()
-            : "Autres";
+    console.log("Plats récupérés :", data);
 
-        if (!grouped[sub]) grouped[sub] = [];
-        grouped[sub].push(dish);
-    });
-
-    cache[category] = grouped;
-    displayCategory(grouped);
-}
-
-// ================================
-// Affiche les plats
-// ================================
-function displayCategory(grouped) {
-    const container = document.getElementById("menu");
     container.innerHTML = "";
 
-    const sortedSubs = Object.keys(grouped).sort((a, b) => {
-        if (a === "Autres") return 1;
-        if (b === "Autres") return -1;
-        return a.localeCompare(b, "fr", { sensitivity: "base" });
-    });
+    if (!data || data.length === 0) {
+      container.innerHTML = "<p>Aucun plat trouvé.</p>";
+      return;
+    }
 
-    sortedSubs.forEach(sub => {
-        if (sub !== "Autres") {
-            const subTitle = document.createElement("h3");
-            subTitle.textContent = sub;
-            subTitle.style.textAlign = "center";
-            subTitle.style.margin = "20px 0 10px";
-            container.appendChild(subTitle);
+    data.forEach(dish => {
+      console.log("Injection plat :", dish.name, dish.image_url);
+
+      const div = document.createElement("div");
+      div.style.border = "1px solid #ddd";
+      div.style.borderRadius = "12px";
+      div.style.padding = "15px";
+      div.style.marginBottom = "20px";
+      div.style.background = dish.available ? "#fff" : "#ffe5e5";
+      div.style.textAlign = "center";
+
+      div.innerHTML = `
+        <div style="margin-bottom:10px;">
+          <strong>${dish.name}</strong> - ${dish.price}€
+        </div>
+        <div style="margin-bottom:10px;">
+          ${dish.category} ${dish.subcategory ? "- " + dish.subcategory : ""}
+        </div>
+        <div style="margin-bottom:10px;">${dish.description || ""}</div>
+        <div style="margin-bottom:10px;"><i>${dish.ingredients || ""}</i></div>
+        ${
+          dish.image_url
+            ? `<img src="${dish.image_url}" alt="${dish.name}" style="width:220px; max-width:100%; border-radius:10px; display:block; margin:0 auto;">`
+            : "<p style='color:#999'>Pas d'image</p>"
         }
+        <div style="margin-top:12px;">
+          <button onclick="toggleDish('${dish.id}', ${dish.available})">
+            ${dish.available ? "Désactiver" : "Activer"}
+          </button>
+          <button onclick="editDish('${dish.id}')">Modifier</button>
+          <button onclick="deleteDish('${dish.id}')">Supprimer</button>
+        </div>
+      `;
 
-        grouped[sub].forEach(dish => {
-            const card = document.createElement("div");
-            card.className = "card";
-
-            const img = createDishImage(dish.image_url, dish.name);
-
-            const nameEl = document.createElement("h3");
-            nameEl.textContent = dish.name;
-
-            const priceEl = document.createElement("p");
-            priceEl.textContent = dish.price + " €";
-
-            if (img) {
-                card.appendChild(img);
-            }
-
-            card.appendChild(nameEl);
-            card.appendChild(priceEl);
-
-            card.addEventListener("click", () => showDetail(dish));
-
-            container.appendChild(card);
-        });
-    });
-}
-
-// ================================
-// Image plein écran
-// ================================
-function showFullscreenImage(src) {
-    if (!src) return;
-
-    const viewer = document.createElement("div");
-    viewer.id = "image-viewer";
-    viewer.style.position = "fixed";
-    viewer.style.top = "0";
-    viewer.style.left = "0";
-    viewer.style.width = "100%";
-    viewer.style.height = "100%";
-    viewer.style.background = "rgba(0,0,0,0.9)";
-    viewer.style.display = "flex";
-    viewer.style.alignItems = "center";
-    viewer.style.justifyContent = "center";
-    viewer.style.zIndex = "9999";
-
-    const img = document.createElement("img");
-    img.src = src;
-    img.style.maxWidth = "95%";
-    img.style.maxHeight = "95%";
-    img.style.borderRadius = "10px";
-
-    img.onerror = function () {
-        console.warn("Impossible d'afficher l'image en plein écran :", src);
-        viewer.remove();
-    };
-
-    viewer.appendChild(img);
-
-    viewer.addEventListener("click", () => {
-        viewer.remove();
+      container.appendChild(div);
     });
 
-    document.body.appendChild(viewer);
+  } catch (err) {
+    console.error("Erreur loadDishes :", err);
+    container.innerHTML = "<p>Erreur lors du chargement des plats.</p>";
+  }
 }
 
-// ================================
-// Fiche détail du plat
-// ================================
-function showDetail(dish) {
-    const detail = document.getElementById("dish-detail");
-    detail.classList.remove("hidden");
+// ======= ACTIONS =======
+async function toggleDish(id, status) {
+  await client.from("dishes").update({ available: !status }).eq("id", id);
+  loadDishes();
+}
 
-    const detailImage = document.getElementById("detail-image");
-    const detailName = document.getElementById("detail-name");
-    const detailPrice = document.getElementById("detail-price");
-    const detailDescription = document.getElementById("detail-description");
-    const detailIngredients = document.getElementById("detail-ingredients");
-    const detailAllergens = document.getElementById("detail-allergens");
+async function deleteDish(id) {
+  const confirmDelete = confirm("Supprimer ce plat et son image ?");
+  if (!confirmDelete) return;
 
-    detailName.textContent = dish.name || "";
-    detailPrice.textContent = (dish.price ?? "") + " €";
-    detailDescription.textContent = dish.description || "";
-    detailIngredients.textContent = dish.ingredients || "";
-    detailAllergens.textContent = dish.allergens || "";
+  try {
+    const { data: dishData, error: fetchError } = await client
+      .from("dishes")
+      .select("image_url")
+      .eq("id", id)
+      .single();
 
-    if (dish.image_url && dish.image_url.trim()) {
-        detailImage.src = dish.image_url.trim();
-        detailImage.style.display = "block";
+    if (fetchError) throw fetchError;
 
-        detailImage.onerror = function () {
-            console.warn("Image détail non chargeable :", dish.image_url);
-            detailImage.style.display = "none";
-        };
-    } else {
-        detailImage.removeAttribute("src");
-        detailImage.style.display = "none";
+    const imageUrl = dishData.image_url;
+
+    if (imageUrl) {
+      const url = new URL(imageUrl);
+      const path = url.pathname;
+      const prefix = "/storage/v1/object/public/dishes-images/";
+      const filePath = path.replace(prefix, "");
+
+      const { error: removeError } = await client.storage
+        .from("dishes-images")
+        .remove([filePath]);
+
+      if (removeError) console.warn("Erreur suppression image:", removeError.message);
     }
+
+    const { error: deleteError } = await client.from("dishes").delete().eq("id", id);
+    if (deleteError) throw deleteError;
+
+    loadDishes();
+  } catch (err) {
+    alert("Erreur : " + err.message);
+  }
 }
 
-// ================================
-// Fermeture fiche détail
-// ================================
-document.addEventListener("DOMContentLoaded", () => {
-    const detail = document.getElementById("dish-detail");
-
-    if (detail) {
-        detail.addEventListener("click", () => detail.classList.add("hidden"));
-
-        detail.querySelectorAll("img, h2, p").forEach(el => {
-            el.addEventListener("click", e => e.stopPropagation());
-        });
-    }
-});
-
-// ================================
-// Menu principal
-// ================================
-function initMainMenu() {
-    const nav = document.getElementById("navigation");
-    nav.innerHTML = "";
-
-    const categories = ["entree", "plat", "dessert", "boisson"];
-
-    categories.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.textContent = cat.toUpperCase();
-        btn.addEventListener("click", () => showCategory(cat));
-        nav.appendChild(btn);
-    });
-
-    document.getElementById("back-button").classList.add("hidden");
+function editDish(id) {
+  console.log("Modifier plat :", id);
 }
 
-// ================================
-// Bouton retour
-// ================================
-document.getElementById("back-button").addEventListener("click", () => {
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+// ======= FORMULAIRE AJOUT =======
+document.getElementById("dish-form")?.addEventListener("submit", async e => {
+  e.preventDefault();
 
-    initMainMenu();
-    document.getElementById("menu").innerHTML = "";
-});
+  const name = document.getElementById("name").value.trim();
+  const category = document.getElementById("category").value;
+  const subcategory = document.getElementById("subcategory").value.trim();
+  const price = parseFloat(document.getElementById("price").value);
+  const description = document.getElementById("description").value.trim();
+  const ingredients = document.getElementById("ingredients").value.trim();
+  const available = document.getElementById("available").checked;
+  const file = document.getElementById("image_file").files[0];
 
-// ================================
-// Lancement
-// ================================
-document.addEventListener("DOMContentLoaded", () => {
-    initMainMenu();
+  let image_url = "";
+
+  if (file) {
+    image_url = await uploadImage(file);
+  }
+
+  const { error } = await client.from("dishes").insert([{
+    name,
+    category,
+    subcategory,
+    price,
+    description,
+    ingredients,
+    available,
+    image_url
+  }]);
+
+  if (error) {
+    alert("Erreur : " + error.message);
+    return;
+  }
+
+  document.getElementById("dish-form").reset();
+  document.getElementById("image-preview")?.innerHTML = "";
+  loadDishes();
 });
