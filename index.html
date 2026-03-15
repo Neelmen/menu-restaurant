@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Menu du restaurant</title>
 
     <!-- Favicon -->
@@ -27,8 +26,11 @@
     <!-- Bouton retour -->
     <div id="back-button" class="hidden">← Retour</div>
 
-    <!-- Conteneur des sous-menus et cartes de plats -->
+    <!-- Conteneur des sous-menus -->
     <div id="menu"></div>
+
+    <!-- Conteneur des cartes de plats -->
+    <div id="dish-list"></div>
 
     <!-- Fiche détaillée du plat -->
     <div id="dish-detail" class="hidden">
@@ -38,6 +40,11 @@
         <p id="detail-description"></p>
         <p id="detail-ingredients"></p>
         <p id="detail-allergens"></p>
+    </div>
+
+    <!-- Visionneuse image plein écran -->
+    <div id="image-viewer" class="hidden">
+        <img src="" alt="Image du plat">
     </div>
 
     <!-- JS de l'application -->
