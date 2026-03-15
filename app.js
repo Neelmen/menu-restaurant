@@ -11,13 +11,38 @@ const cache = {};
 let currentCategory = null;
 
 // ================================
+// Helpers image
+// ================================
+function createDishImage(src, altText = "Image du plat") {
+    if (!src || typeof src !== "string" || !src.trim()) {
+        return null;
+    }
+
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.src = src.trim();
+    img.alt = altText;
+    img.className = "dish-image";
+
+    img.onerror = function () {
+        console.warn("Image introuvable ou non chargeable :", src);
+        this.style.display = "none";
+    };
+
+    img.addEventListener("click", (e) => {
+        e.stopPropagation();
+        showFullscreenImage(src.trim());
+    });
+
+    return img;
+}
+
+// ================================
 // Affiche la catégorie sélectionnée
 // ================================
 async function showCategory(category) {
-
     currentCategory = category;
 
-    // retour automatique en haut
     window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -26,7 +51,6 @@ async function showCategory(category) {
     const container = document.getElementById("menu");
     container.innerHTML = "";
 
-    // bouton actif
     const navButtons = document.querySelectorAll("#navigation button");
     navButtons.forEach(btn => {
         btn.classList.remove("active");
@@ -46,7 +70,9 @@ async function showCategory(category) {
         .from("dishes")
         .select("*")
         .eq("category", category)
-        .eq("available", true);
+        .eq("available", true)
+        .order("subcategory", { ascending: true })
+        .order("name", { ascending: true });
 
     if (error) {
         console.error("Erreur Supabase:", error);
@@ -56,7 +82,10 @@ async function showCategory(category) {
 
     const grouped = {};
     data.forEach(dish => {
-        const sub = dish.subcategory || "Autres";
+        const sub = dish.subcategory && dish.subcategory.trim()
+            ? dish.subcategory.trim()
+            : "Autres";
+
         if (!grouped[sub]) grouped[sub] = [];
         grouped[sub].push(dish);
     });
@@ -69,55 +98,47 @@ async function showCategory(category) {
 // Affiche les plats
 // ================================
 function displayCategory(grouped) {
-
     const container = document.getElementById("menu");
     container.innerHTML = "";
 
-    Object.keys(grouped).forEach(sub => {
+    const sortedSubs = Object.keys(grouped).sort((a, b) => {
+        if (a === "Autres") return 1;
+        if (b === "Autres") return -1;
+        return a.localeCompare(b, "fr", { sensitivity: "base" });
+    });
 
+    sortedSubs.forEach(sub => {
         if (sub !== "Autres") {
-            const h3 = document.createElement("h3");
-            h3.textContent = sub;
-            h3.style.textAlign = "center";
-            h3.style.margin = "20px 0 10px";
-            container.appendChild(h3);
+            const subTitle = document.createElement("h3");
+            subTitle.textContent = sub;
+            subTitle.style.textAlign = "center";
+            subTitle.style.margin = "20px 0 10px";
+            container.appendChild(subTitle);
         }
 
         grouped[sub].forEach(dish => {
-
             const card = document.createElement("div");
             card.className = "card";
 
-            // Créer l'image via JS pour Messenger
-            const img = document.createElement("img");
-            img.loading = "lazy";
-            img.src = dish.image_url;
-            img.alt = dish.name;
-            img.className = "dish-image";
+            const img = createDishImage(dish.image_url, dish.name);
 
-            // clic sur image = plein écran
-            img.addEventListener("click", (e) => {
-                e.stopPropagation();
-                showFullscreenImage(dish.image_url);
-            });
+            const nameEl = document.createElement("h3");
+            nameEl.textContent = dish.name;
 
-            // Ajouter les infos
-            const h3Name = document.createElement("h3");
-            h3Name.textContent = dish.name;
+            const priceEl = document.createElement("p");
+            priceEl.textContent = dish.price + " €";
 
-            const pPrice = document.createElement("p");
-            pPrice.textContent = dish.price + " €";
+            if (img) {
+                card.appendChild(img);
+            }
 
-            card.appendChild(img);
-            card.appendChild(h3Name);
-            card.appendChild(pPrice);
+            card.appendChild(nameEl);
+            card.appendChild(priceEl);
 
-            // clic sur la carte = détail
             card.addEventListener("click", () => showDetail(dish));
 
             container.appendChild(card);
         });
-
     });
 }
 
@@ -125,6 +146,7 @@ function displayCategory(grouped) {
 // Image plein écran
 // ================================
 function showFullscreenImage(src) {
+    if (!src) return;
 
     const viewer = document.createElement("div");
     viewer.id = "image-viewer";
@@ -144,6 +166,12 @@ function showFullscreenImage(src) {
     img.style.maxWidth = "95%";
     img.style.maxHeight = "95%";
     img.style.borderRadius = "10px";
+
+    img.onerror = function () {
+        console.warn("Impossible d'afficher l'image en plein écran :", src);
+        viewer.remove();
+    };
+
     viewer.appendChild(img);
 
     viewer.addEventListener("click", () => {
@@ -157,32 +185,55 @@ function showFullscreenImage(src) {
 // Fiche détail du plat
 // ================================
 function showDetail(dish) {
-
     const detail = document.getElementById("dish-detail");
     detail.classList.remove("hidden");
 
-    document.getElementById("detail-image").src = dish.image_url;
-    document.getElementById("detail-name").textContent = dish.name;
-    document.getElementById("detail-price").textContent = dish.price + " €";
-    document.getElementById("detail-description").textContent = dish.description || "";
-    document.getElementById("detail-ingredients").textContent = dish.ingredients || "";
-    document.getElementById("detail-allergens").textContent = dish.allergens || "";
+    const detailImage = document.getElementById("detail-image");
+    const detailName = document.getElementById("detail-name");
+    const detailPrice = document.getElementById("detail-price");
+    const detailDescription = document.getElementById("detail-description");
+    const detailIngredients = document.getElementById("detail-ingredients");
+    const detailAllergens = document.getElementById("detail-allergens");
+
+    detailName.textContent = dish.name || "";
+    detailPrice.textContent = (dish.price ?? "") + " €";
+    detailDescription.textContent = dish.description || "";
+    detailIngredients.textContent = dish.ingredients || "";
+    detailAllergens.textContent = dish.allergens || "";
+
+    if (dish.image_url && dish.image_url.trim()) {
+        detailImage.src = dish.image_url.trim();
+        detailImage.style.display = "block";
+
+        detailImage.onerror = function () {
+            console.warn("Image détail non chargeable :", dish.image_url);
+            detailImage.style.display = "none";
+        };
+    } else {
+        detailImage.removeAttribute("src");
+        detailImage.style.display = "none";
+    }
 }
 
 // ================================
 // Fermeture fiche détail
 // ================================
-const detail = document.getElementById("dish-detail");
-detail.addEventListener("click", () => detail.classList.add("hidden"));
-detail.querySelectorAll("img, h2, p").forEach(el => {
-    el.addEventListener("click", e => e.stopPropagation());
+document.addEventListener("DOMContentLoaded", () => {
+    const detail = document.getElementById("dish-detail");
+
+    if (detail) {
+        detail.addEventListener("click", () => detail.classList.add("hidden"));
+
+        detail.querySelectorAll("img, h2, p").forEach(el => {
+            el.addEventListener("click", e => e.stopPropagation());
+        });
+    }
 });
 
 // ================================
 // Menu principal
 // ================================
 function initMainMenu() {
-
     const nav = document.getElementById("navigation");
     nav.innerHTML = "";
 
@@ -202,7 +253,6 @@ function initMainMenu() {
 // Bouton retour
 // ================================
 document.getElementById("back-button").addEventListener("click", () => {
-
     window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -210,7 +260,6 @@ document.getElementById("back-button").addEventListener("click", () => {
 
     initMainMenu();
     document.getElementById("menu").innerHTML = "";
-
 });
 
 // ================================
