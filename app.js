@@ -1,23 +1,38 @@
 // ================================
-// app.js - Menu digital optimisé
+// app.js - site client
 // ================================
-console.log("APP JS CHARGÉ");
+console.log("APP JS CLIENT CHARGÉ");
 
 const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const BUCKET_NAME = "dishes-images";
 const cache = {};
 let currentCategory = null;
+
+// ================================
+// Construit l'URL publique depuis image_path
+// ================================
+function getImageUrlFromPath(imagePath) {
+    if (!imagePath) return "";
+    return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${imagePath}`;
+}
+
+// ================================
+// Retourne le chemin image depuis dish
+// priorité absolue à image_path
+// ================================
+function getDishImagePath(dish) {
+    return dish.image_path || "";
+}
 
 // ================================
 // Affiche la catégorie sélectionnée
 // ================================
 async function showCategory(category) {
-
     currentCategory = category;
 
-    // retour automatique en haut
     window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -26,7 +41,6 @@ async function showCategory(category) {
     const container = document.getElementById("menu");
     container.innerHTML = "";
 
-    // bouton actif
     const navButtons = document.querySelectorAll("#navigation button");
     navButtons.forEach(btn => {
         btn.classList.remove("active");
@@ -69,12 +83,10 @@ async function showCategory(category) {
 // Affiche les plats
 // ================================
 function displayCategory(grouped) {
-
     const container = document.getElementById("menu");
     container.innerHTML = "";
 
     Object.keys(grouped).forEach(sub => {
-
         if (sub !== "Autres") {
             const h3 = document.createElement("h3");
             h3.textContent = sub;
@@ -84,24 +96,28 @@ function displayCategory(grouped) {
         }
 
         grouped[sub].forEach(dish => {
-
             const card = document.createElement("div");
             card.className = "card";
 
-            // Créer l'image via JS pour Messenger
+            const imagePath = getDishImagePath(dish);
+            const imageUrl = getImageUrlFromPath(imagePath);
+
             const img = document.createElement("img");
             img.loading = "lazy";
-            img.src = dish.image_url;
             img.alt = dish.name;
             img.className = "dish-image";
+            img.src = imageUrl;
 
-            // clic sur image = plein écran
+            img.onerror = function () {
+                console.error("Image introuvable :", imageUrl);
+                this.style.display = "none";
+            };
+
             img.addEventListener("click", (e) => {
                 e.stopPropagation();
-                showFullscreenImage(dish.image_url);
+                showFullscreenImage(imageUrl);
             });
 
-            // Ajouter les infos
             const h3Name = document.createElement("h3");
             h3Name.textContent = dish.name;
 
@@ -112,12 +128,10 @@ function displayCategory(grouped) {
             card.appendChild(h3Name);
             card.appendChild(pPrice);
 
-            // clic sur la carte = détail
             card.addEventListener("click", () => showDetail(dish));
 
             container.appendChild(card);
         });
-
     });
 }
 
@@ -125,7 +139,6 @@ function displayCategory(grouped) {
 // Image plein écran
 // ================================
 function showFullscreenImage(src) {
-
     const viewer = document.createElement("div");
     viewer.id = "image-viewer";
     viewer.style.position = "fixed";
@@ -144,6 +157,7 @@ function showFullscreenImage(src) {
     img.style.maxWidth = "95%";
     img.style.maxHeight = "95%";
     img.style.borderRadius = "10px";
+
     viewer.appendChild(img);
 
     viewer.addEventListener("click", () => {
@@ -157,11 +171,13 @@ function showFullscreenImage(src) {
 // Fiche détail du plat
 // ================================
 function showDetail(dish) {
-
     const detail = document.getElementById("dish-detail");
     detail.classList.remove("hidden");
 
-    document.getElementById("detail-image").src = dish.image_url;
+    const imagePath = getDishImagePath(dish);
+    const imageUrl = getImageUrlFromPath(imagePath);
+
+    document.getElementById("detail-image").src = imageUrl;
     document.getElementById("detail-name").textContent = dish.name;
     document.getElementById("detail-price").textContent = dish.price + " €";
     document.getElementById("detail-description").textContent = dish.description || "";
@@ -173,16 +189,17 @@ function showDetail(dish) {
 // Fermeture fiche détail
 // ================================
 const detail = document.getElementById("dish-detail");
-detail.addEventListener("click", () => detail.classList.add("hidden"));
-detail.querySelectorAll("img, h2, p").forEach(el => {
-    el.addEventListener("click", e => e.stopPropagation());
-});
+if (detail) {
+    detail.addEventListener("click", () => detail.classList.add("hidden"));
+    detail.querySelectorAll("img, h2, p").forEach(el => {
+        el.addEventListener("click", e => e.stopPropagation());
+    });
+}
 
 // ================================
 // Menu principal
 // ================================
 function initMainMenu() {
-
     const nav = document.getElementById("navigation");
     nav.innerHTML = "";
 
@@ -202,7 +219,6 @@ function initMainMenu() {
 // Bouton retour
 // ================================
 document.getElementById("back-button").addEventListener("click", () => {
-
     window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -210,7 +226,6 @@ document.getElementById("back-button").addEventListener("click", () => {
 
     initMainMenu();
     document.getElementById("menu").innerHTML = "";
-
 });
 
 // ================================
