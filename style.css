@@ -36,14 +36,14 @@ h1 {
     font-weight: bold;
     box-shadow: 0 5px 10px rgba(0,0,0,0.2);
     z-index: 2;
-    color: #333;
+    color: #333 !important;
     -webkit-appearance: none;
     font-family: inherit;
 }
 
 #navigation button:hover {
     background: #e63946;
-    color: white;
+    color: white !important;
 }
 
 /* ===============================
@@ -56,7 +56,7 @@ h1 {
     border: none;
     border-radius: 12px;
     background: white;
-    color: #333;
+    color: #333 !important;
     cursor: pointer;
     margin: 10px auto;
     display: block;
@@ -68,7 +68,7 @@ h1 {
 
 #menu button:hover {
     background: #E69830;
-    color: white;
+    color: white !important;
 }
 
 /* ===============================
@@ -146,7 +146,7 @@ h1 {
     left: 50%;
     transform: translateX(-50%);
     background: #e63946;
-    color: white;
+    color: white !important;
     padding: 12px 25px;
     border-radius: 30px;
     font-weight: bold;
@@ -159,7 +159,7 @@ h1 {
 
 #navigation button.active {
     background: #e63946;
-    color: white;
+    color: white !important;
 }
 
 /* ===============================
@@ -194,6 +194,6 @@ h1 {
 /* Safari fallback pour tous les boutons et inputs */
 button, input, select, textarea {
     -webkit-appearance: none;
-    color: inherit;
+    color: inherit !important;
     font-family: inherit;
 }
