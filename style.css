@@ -197,3 +197,6 @@ button, input, select, textarea {
     color: inherit !important;
     font-family: inherit;
 }
+#menu button.sub-category {
+    display: none;
+}
