@@ -80,12 +80,6 @@ function displayCategory(grouped) {
     container.innerHTML = "";
 
     Object.keys(grouped).forEach(sub => {
-        if (sub !== "Autres") {
-            const h3 = document.createElement("h3");
-            h3.textContent = sub;
-            h3.style.textAlign = "center";
-            h3.style.margin = "20px 0 10px";
-            container.appendChild(h3);
         }
 
         grouped[sub].forEach(dish => {
