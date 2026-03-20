@@ -241,3 +241,8 @@ button, input, select, textarea {
         min-height: 100vh;
     }
 }
+.logo {
+    width: 120px;
+    margin: 20px auto 10px;
+    display: block;
+}
