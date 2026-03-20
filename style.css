@@ -225,11 +225,11 @@ button, input, select, textarea {
     }
 
     .side.left {
-        background-image: url("gauche.jpg");
+        background-image: url("gauche.png");
     }
 
     .side.right {
-        background-image: url("droite.jpg");
+        background-image: url("droite.png");
     }
 
     /* Zone centrale (ton site) */
