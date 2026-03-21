@@ -19,16 +19,23 @@ function getImageUrlFromPath(imagePath) {
 }
 
 // ================================
+// Retourne le chemin image depuis dish
+// ================================
+function getDishImagePath(dish) {
+    return dish.image_path || "";
+}
+
+// ================================
 // Affiche la catégorie sélectionnée
 // ================================
 async function showCategory(category) {
     currentCategory = category;
+
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    const container = document.getElementById("menu");
+    const container = document.getElementById("card-list");
     container.innerHTML = "";
 
-    // Boutons navigation
     const navButtons = document.querySelectorAll("#navigation button");
     navButtons.forEach(btn => {
         btn.classList.remove("active");
@@ -42,7 +49,6 @@ async function showCategory(category) {
         return;
     }
 
-    // Récupération depuis Supabase
     const { data, error } = await client
         .from("dishes")
         .select("*")
@@ -51,11 +57,10 @@ async function showCategory(category) {
 
     if (error) {
         console.error("Erreur Supabase:", error);
-        container.innerHTML = "<p>Erreur lors du chargement des plats.</p>";
+        container.innerHTML = "<p>Erreur lors du chargement des cartes.</p>";
         return;
     }
 
-    // Regroupe dynamiquement par subcategory
     const grouped = {};
     data.forEach(dish => {
         const sub = dish.subcategory || "Autres";
@@ -68,52 +73,38 @@ async function showCategory(category) {
 }
 
 // ================================
-// Affiche les plats triés par subcategory dans 2 colonnes
+// Affiche les plats (2 colonnes, cartes carrées)
 // ================================
 function displayCategory(grouped) {
-    const container = document.getElementById("menu");
+    const container = document.getElementById("card-list");
     container.innerHTML = "";
 
-    // Tri des subcategories
-    const subsSorted = Object.keys(grouped).sort();
+    Object.values(grouped).flat().forEach(dish => {
+        const card = document.createElement("div");
+        card.className = "card";
 
-    subsSorted.forEach(sub => {
-        // Crée un groupe de catégorie (2 colonnes)
-        const groupDiv = document.createElement("div");
-        groupDiv.className = "category-group";
+        const imageWrapper = document.createElement("div");
+        imageWrapper.className = "card-image";
 
-        // Ajoute les plats
-        grouped[sub].forEach(dish => {
-            const card = document.createElement("div");
-            card.className = "card";
+        const img = document.createElement("img");
+        img.src = getImageUrlFromPath(dish.image_path || "");
+        img.alt = dish.name;
+        img.loading = "lazy";
 
-            const imageUrl = getImageUrlFromPath(dish.image_path);
+        imageWrapper.appendChild(img);
+        card.appendChild(imageWrapper);
 
-            const img = document.createElement("img");
-            img.loading = "lazy";
-            img.alt = dish.name;
-            img.src = imageUrl;
-            img.onerror = () => img.style.display = "none";
-            img.addEventListener("click", e => {
-                e.stopPropagation();
-                showFullscreenImage(imageUrl);
-            });
+        const h3 = document.createElement("h3");
+        h3.textContent = dish.name;
+        card.appendChild(h3);
 
-            const h3Name = document.createElement("h3");
-            h3Name.textContent = dish.name;
+        const p = document.createElement("p");
+        p.textContent = dish.price + " €";
+        card.appendChild(p);
 
-            const pPrice = document.createElement("p");
-            pPrice.textContent = dish.price + " €";
+        card.addEventListener("click", () => showDetail(dish));
 
-            card.appendChild(img);
-            card.appendChild(h3Name);
-            card.appendChild(pPrice);
-            card.addEventListener("click", () => showDetail(dish));
-
-            groupDiv.appendChild(card);
-        });
-
-        container.appendChild(groupDiv);
+        container.appendChild(card);
     });
 }
 
@@ -154,7 +145,8 @@ function showDetail(dish) {
     const detail = document.getElementById("dish-detail");
     detail.classList.remove("hidden");
 
-    const imageUrl = getImageUrlFromPath(dish.image_path);
+    const imagePath = getDishImagePath(dish);
+    const imageUrl = getImageUrlFromPath(imagePath);
 
     document.getElementById("detail-image").src = imageUrl;
     document.getElementById("detail-name").textContent = dish.name;
@@ -199,7 +191,7 @@ function initMainMenu() {
 document.getElementById("back-button").addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     initMainMenu();
-    document.getElementById("menu").innerHTML = "";
+    document.getElementById("card-list").innerHTML = "";
 });
 
 // ================================
