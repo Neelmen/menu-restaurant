@@ -71,10 +71,14 @@ async function showCategory(category) {
 // ================================
 // Affiche les plats triés par subcategory dans 2 colonnes
 // ================================
+// ================================
+// Affiche les plats triés par subcategory dans 2 colonnes
+// ================================
 function displayCategory(grouped) {
     const container = document.getElementById("menu");
     container.innerHTML = "";
 
+    // Tri des sous-catégories
     Object.keys(grouped)
         .sort()
         .forEach(sub => {
@@ -85,6 +89,7 @@ function displayCategory(grouped) {
                 const card = document.createElement("div");
                 card.className = "card";
 
+                // Image
                 const imageUrl = getImageUrlFromPath(dish.image_path);
                 const img = document.createElement("img");
                 img.loading = "lazy";
@@ -96,23 +101,27 @@ function displayCategory(grouped) {
                     showFullscreenImage(imageUrl);
                 });
 
+                // Nom du plat
                 const h3Name = document.createElement("h3");
                 h3Name.textContent = dish.name;
 
+                // Prix
                 const pPrice = document.createElement("p");
                 pPrice.textContent = dish.price + " €";
 
+                // Description
                 const pDesc = document.createElement("p");
-                pDesc.textContent = dish.description || "";
                 if (dish.description) {
-                    pIng.innerHTML = "<b>°</b> " + dish.description;
+                    pDesc.innerHTML = "<b>°</b> " + dish.description;
                 }
 
+                // Ingrédients
                 const pIng = document.createElement("p");
                 if (dish.ingredients) {
                     pIng.innerHTML = "<b>Ingrédients :</b> " + dish.ingredients;
                 }
 
+                // Assemblage de la carte
                 card.append(img, h3Name, pPrice, pDesc, pIng);
                 card.addEventListener("click", () => showDetail(dish));
 
