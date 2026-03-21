@@ -116,7 +116,7 @@ h1 {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    z-index: 10;
+    z-index: 10000; /* plus haut que image-viewer */
 }
 
 #dish-detail img {
@@ -151,7 +151,7 @@ h1 {
     border-radius: 30px;
     font-weight: bold;
     cursor: pointer;
-    z-index: 10001; /* plus grand que #dish-detail et #image-viewer */
+    z-index: 10001; /* toujours au-dessus */
     box-shadow: 0 8px 20px rgba(0,0,0,0.35);
 }
 
@@ -173,7 +173,7 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 999;
+    z-index: 9999; /* en dessous de dish-detail et back-button */
 }
 
 #image-viewer img {
