@@ -5,7 +5,10 @@ console.log("APP JS CLIENT CHARGÉ");
 
 const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
 const BUCKET_NAME = "dishes-images";
-const client = supabase.createClient(SUPABASE_URL, "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY");
+const client = supabase.createClient(
+    SUPABASE_URL,
+    "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY"
+);
 
 const cache = {};
 let currentCategory = null;
@@ -29,10 +32,8 @@ async function showCategory(category) {
     container.innerHTML = "";
 
     // Boutons navigation
-    const navButtons = document.querySelectorAll("#navigation button");
-    navButtons.forEach(btn => {
-        btn.classList.remove("active");
-        if (btn.textContent.toLowerCase() === category) btn.classList.add("active");
+    document.querySelectorAll("#navigation button").forEach(btn => {
+        btn.classList.toggle("active", btn.textContent.toLowerCase() === category);
     });
 
     document.getElementById("back-button").classList.remove("hidden");
@@ -55,13 +56,13 @@ async function showCategory(category) {
         return;
     }
 
-    // Regroupe dynamiquement par subcategory
-    const grouped = {};
-    data.forEach(dish => {
+    // Regroupe par subcategory
+    const grouped = data.reduce((acc, dish) => {
         const sub = dish.subcategory || "Autres";
-        if (!grouped[sub]) grouped[sub] = [];
-        grouped[sub].push(dish);
-    });
+        if (!acc[sub]) acc[sub] = [];
+        acc[sub].push(dish);
+        return acc;
+    }, {});
 
     cache[category] = grouped;
     displayCategory(grouped);
@@ -74,59 +75,49 @@ function displayCategory(grouped) {
     const container = document.getElementById("menu");
     container.innerHTML = "";
 
-    // Tri des subcategories
-    const subsSorted = Object.keys(grouped).sort();
+    Object.keys(grouped)
+        .sort()
+        .forEach(sub => {
+            const groupDiv = document.createElement("div");
+            groupDiv.className = "category-group";
 
-    subsSorted.forEach(sub => {
-        // Crée un groupe de catégorie (2 colonnes)
-        const groupDiv = document.createElement("div");
-        groupDiv.className = "category-group";
+            grouped[sub].forEach(dish => {
+                const card = document.createElement("div");
+                card.className = "card";
 
-        // Ajoute les plats
-        grouped[sub].forEach(dish => {
-            const card = document.createElement("div");
-            card.className = "card";
+                const imageUrl = getImageUrlFromPath(dish.image_path);
+                const img = document.createElement("img");
+                img.loading = "lazy";
+                img.alt = dish.name;
+                img.src = imageUrl;
+                img.onerror = () => (img.style.display = "none");
+                img.addEventListener("click", e => {
+                    e.stopPropagation();
+                    showFullscreenImage(imageUrl);
+                });
 
-            const imageUrl = getImageUrlFromPath(dish.image_path);
+                const h3Name = document.createElement("h3");
+                h3Name.textContent = dish.name;
 
-            const img = document.createElement("img");
-            img.loading = "lazy";
-            img.alt = dish.name;
-            img.src = imageUrl;
-            img.onerror = () => img.style.display = "none";
-            img.addEventListener("click", e => {
-                e.stopPropagation();
-                showFullscreenImage(imageUrl);
+                const pPrice = document.createElement("p");
+                pPrice.textContent = dish.price + " €";
+
+                const pDesc = document.createElement("p");
+                pDesc.textContent = dish.description || "";
+
+                const pIng = document.createElement("p");
+                if (dish.ingredients) {
+                    pIng.innerHTML = "<b>Ingrédients :</b> " + dish.ingredients;
+                }
+
+                card.append(img, h3Name, pPrice, pDesc, pIng);
+                card.addEventListener("click", () => showDetail(dish));
+
+                groupDiv.appendChild(card);
             });
 
-            const h3Name = document.createElement("h3");
-            h3Name.textContent = dish.name;
-
-            const pPrice = document.createElement("p");
-            pPrice.textContent = dish.price + " €";
-
-            // Ajout description + ingrédients avec texte fixe
-            const pDesc = document.createElement("p");
-            pDesc.textContent = dish.description || "";
-
-            const pIng = document.createElement("p");
-            if (dish.ingredients) {
-                pIng.innerHTML = "<b>Ingrédients :</b> " + dish.ingredients;
-            }
-
-            card.appendChild(img);
-            card.appendChild(h3Name);
-            card.appendChild(pPrice);
-            card.appendChild(pDesc);
-            card.appendChild(pIng);
-
-            card.addEventListener("click", () => showDetail(dish));
-
-            groupDiv.appendChild(card);
+            container.appendChild(groupDiv);
         });
-
-        container.appendChild(groupDiv);
-    });
 }
 
 // ================================
@@ -135,27 +126,29 @@ function displayCategory(grouped) {
 function showFullscreenImage(src) {
     const viewer = document.createElement("div");
     viewer.id = "image-viewer";
-    viewer.style.position = "fixed";
-    viewer.style.top = "0";
-    viewer.style.left = "0";
-    viewer.style.width = "100%";
-    viewer.style.height = "100%";
-    viewer.style.background = "rgba(0,0,0,0.9)";
-    viewer.style.display = "flex";
-    viewer.style.alignItems = "center";
-    viewer.style.justifyContent = "center";
-    viewer.style.zIndex = "9999";
+    Object.assign(viewer.style, {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        background: "rgba(0,0,0,0.9)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+    });
 
     const img = document.createElement("img");
     img.src = src;
-    img.style.maxWidth = "95%";
-    img.style.maxHeight = "95%";
-    img.style.borderRadius = "10px";
+    Object.assign(img.style, {
+        maxWidth: "95%",
+        maxHeight: "95%",
+        borderRadius: "10px",
+    });
 
     viewer.appendChild(img);
-
     viewer.addEventListener("click", () => viewer.remove());
-
     document.body.appendChild(viewer);
 }
 
@@ -182,9 +175,9 @@ function showDetail(dish) {
 const detail = document.getElementById("dish-detail");
 if (detail) {
     detail.addEventListener("click", () => detail.classList.add("hidden"));
-    detail.querySelectorAll("img, h2, p").forEach(el => {
-        el.addEventListener("click", e => e.stopPropagation());
-    });
+    detail.querySelectorAll("img, h2, p").forEach(el =>
+        el.addEventListener("click", e => e.stopPropagation())
+    );
 }
 
 // ================================
