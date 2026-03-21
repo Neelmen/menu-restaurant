@@ -183,7 +183,7 @@ function showDetail(dish) {
     // afficher le bouton retour
     const backButton = document.getElementById("back-button");
     backButton.classList.remove("hidden");
-});
+}
 
 // ================================
 // Fermeture fiche détail
