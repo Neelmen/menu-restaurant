@@ -111,7 +111,7 @@ h1 {
     height: 100%;
     background: rgba(0,0,0,0.85);
     color: white;
-    display: none;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -199,4 +199,7 @@ button, input, select, textarea {
 }
 #menu button.sub-category {
     display: none;
+}
+.hidden {
+    display: none !important;
 }
