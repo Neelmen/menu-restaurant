@@ -179,7 +179,11 @@ function showDetail(dish) {
     document.getElementById("detail-description").textContent = dish.description || "";
     document.getElementById("detail-ingredients").textContent = dish.ingredients || "";
     document.getElementById("detail-allergens").textContent = dish.allergens || "";
-}
+
+    // afficher le bouton retour
+    const backButton = document.getElementById("back-button");
+    backButton.classList.remove("hidden");
+});
 
 // ================================
 // Fermeture fiche détail
