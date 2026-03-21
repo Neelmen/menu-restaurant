@@ -22,7 +22,7 @@ function getImageUrlFromPath(imagePath) {
 // Retourne le chemin image depuis dish
 // ================================
 function getDishImagePath(dish) {
-    return dish.image_path || ""; // priorité absolue à image_path
+    return dish.image_path || ""; 
 }
 
 // ================================
@@ -30,12 +30,12 @@ function getDishImagePath(dish) {
 // ================================
 async function showCategory(category) {
     currentCategory = category;
-
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     const container = document.getElementById("menu");
     container.innerHTML = "";
 
+    // Boutons navigation
     const navButtons = document.querySelectorAll("#navigation button");
     navButtons.forEach(btn => {
         btn.classList.remove("active");
@@ -49,6 +49,7 @@ async function showCategory(category) {
         return;
     }
 
+    // Récupération depuis Supabase
     const { data, error } = await client
         .from("dishes")
         .select("*")
@@ -61,6 +62,7 @@ async function showCategory(category) {
         return;
     }
 
+    // Regroupe dynamiquement par subcategory
     const grouped = {};
     data.forEach(dish => {
         const sub = dish.subcategory || "Autres";
@@ -73,32 +75,29 @@ async function showCategory(category) {
 }
 
 // ================================
-// Affiche les plats
+// Affiche les plats triés par subcategory, sans afficher le nom
 // ================================
 function displayCategory(grouped) {
     const container = document.getElementById("menu");
     container.innerHTML = "";
 
-    Object.keys(grouped).forEach(sub => {
+    // Parcours toutes les subcategories (pour trier)
+    const subsSorted = Object.keys(grouped).sort();
 
+    subsSorted.forEach(sub => {
+        // Affiche uniquement les plats, pas le titre subcategory
         grouped[sub].forEach(dish => {
             const card = document.createElement("div");
             card.className = "card";
 
-            const imagePath = getDishImagePath(dish);
-            const imageUrl = getImageUrlFromPath(imagePath);
+            const imageUrl = getImageUrlFromPath(dish.image_path);
 
             const img = document.createElement("img");
             img.loading = "lazy";
             img.alt = dish.name;
             img.className = "dish-image";
             img.src = imageUrl;
-
-            img.onerror = function () {
-                console.error("Image introuvable :", imageUrl);
-                this.style.display = "none";
-            };
-
+            img.onerror = () => img.style.display = "none";
             img.addEventListener("click", e => {
                 e.stopPropagation();
                 showFullscreenImage(imageUrl);
@@ -113,12 +112,10 @@ function displayCategory(grouped) {
             card.appendChild(img);
             card.appendChild(h3Name);
             card.appendChild(pPrice);
-
             card.addEventListener("click", () => showDetail(dish));
 
             container.appendChild(card);
         });
-
     });
 }
 
@@ -159,8 +156,7 @@ function showDetail(dish) {
     const detail = document.getElementById("dish-detail");
     detail.classList.remove("hidden");
 
-    const imagePath = getDishImagePath(dish);
-    const imageUrl = getImageUrlFromPath(imagePath);
+    const imageUrl = getImageUrlFromPath(dish.image_path);
 
     document.getElementById("detail-image").src = imageUrl;
     document.getElementById("detail-name").textContent = dish.name;
