@@ -112,7 +112,7 @@ function displayCategory(grouped) {
                 // Description
                 const pDesc = document.createElement("p");
                 if (dish.description) {
-                    pDesc.innerHTML = "<b>°</b> " + dish.description;
+                    pDesc.innerHTML = "<b>Déscription :</b> " + dish.description;
                 }
 
                 // Ingrédients
