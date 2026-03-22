@@ -78,8 +78,9 @@ h1 {
     background: white;
     border-radius: 10px;
     overflow: hidden;
-    width: 260px;
-    margin: 20px auto;
+    width: 100%;
+    max-width: 260px;
+    margin: 0;
     cursor: pointer;
     box-shadow: 0 10px 20px rgba(0,0,0,0.3);
 }
@@ -200,4 +201,10 @@ button, input, select, textarea {
 }
 .hidden {
     display: none !important;
+}
+.category-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    justify-items: center;
 }
