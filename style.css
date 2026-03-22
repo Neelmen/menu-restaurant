@@ -64,6 +64,7 @@ h1 {
     z-index: 2;
     -webkit-appearance: none;
     font-family: inherit;
+   margin-bottom: 30px;
 }
 
 #menu button:hover {
@@ -207,5 +208,4 @@ button, input, select, textarea {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     justify-items: center;
-    margin-top: 30px;
 }
