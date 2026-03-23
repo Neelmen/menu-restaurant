@@ -212,3 +212,10 @@ button, input, select, textarea {
     max-width: 500px; /* largeur totale du "grid" comme sur mobile */
     margin: 0 auto; /* centre le grid sur grand écran */
 }
+.category-group {
+    margin-bottom: 30px;
+}
+#menu h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
