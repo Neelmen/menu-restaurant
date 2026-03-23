@@ -207,6 +207,8 @@ button, input, select, textarea {
 .category-group {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: 20px; /* espacement entre les cartes */
     justify-items: center;
+    max-width: 500px; /* largeur totale du "grid" comme sur mobile */
+    margin: 0 auto; /* centre le grid sur grand écran */
 }
