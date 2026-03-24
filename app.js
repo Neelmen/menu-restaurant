@@ -225,7 +225,10 @@ function showDetail(dish) {
     const pPrice = document.createElement("p");
     pPrice.textContent = dish.price + " €";
 
-    // Infos supplémentaires
+    // Assemblage principal : image + nom + prix
+    card.append(img, h3Name, pPrice);
+
+    // Infos supplémentaires en dessous
     if (dish.description) {
         const pDesc = document.createElement("p");
         pDesc.innerHTML = "<b>Description :</b> " + dish.description;
@@ -242,8 +245,6 @@ function showDetail(dish) {
         card.appendChild(pAllerg);
     }
 
-    // Assemblage final
-    card.append(img, h3Name, pPrice);
     detail.appendChild(card);
 }
 
