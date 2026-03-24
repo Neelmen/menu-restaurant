@@ -237,7 +237,7 @@ function initMainMenu() {
   { key: "entree", label: "ENTRÉES" },
   { key: "plat", label: "PLATS" },
   { key: "dessert", label: "DESSERTS" },
-  { key: "boisson", label: "BOISSONS" }
+  { key: "boisson", label: "BOISSONS" },
   { key: "accompagnement", label: "ACCOMPAGNEMENTS" }
 ];
 
