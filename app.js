@@ -27,6 +27,7 @@ function getImageUrlFromPath(imagePath) {
 async function showCategory(category) {
     if (currentCategory === category) {
     currentCategory = null;
+    closeMenuAnimation();
 
     const container = document.getElementById("menu");
     const cards = container.querySelectorAll(".card");
@@ -340,3 +341,60 @@ function scrollToMenu() {
         });
     });
 }
+// Fonction pour fermer le menu avec animation
+function closeMenuAnimation(callback) {
+    const container = document.getElementById("menu");
+    container.style.opacity = 1;
+    const anim = container.animate([
+        { opacity: 1, transform: 'translateY(0)' },
+        { opacity: 0, transform: 'translateY(-20px)' }
+    ], {
+        duration: 300,
+        easing: 'ease-out',
+        fill: 'forwards'
+    });
+
+    anim.onfinish = () => {
+        container.innerHTML = "";
+        document.getElementById("back-button").classList.add("hidden");
+
+        // Reset boutons actifs
+        const navButtons = document.querySelectorAll("#navigation button");
+        navButtons.forEach(btn => btn.classList.remove("active"));
+
+        // Gestion hover
+        const nav = document.getElementById("navigation");
+        nav.classList.add("no-hover");
+        const reactivateHover = () => {
+            nav.classList.remove("no-hover");
+            window.removeEventListener("touchstart", reactivateHover);
+            window.removeEventListener("mousemove", reactivateHover);
+        };
+        window.addEventListener("touchstart", reactivateHover);
+        window.addEventListener("mousemove", reactivateHover);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (callback) callback();
+    };
+}
+
+// Gestion bouton retour
+document.getElementById("back-button").addEventListener("click", () => {
+    const detail = document.getElementById("dish-detail");
+    const viewer = document.getElementById("image-viewer");
+
+    if (detail && !detail.classList.contains("hidden")) {
+        // Fiche zoomée ouverte → juste fermer la carte
+        detail.classList.add("hidden");
+    } else if (viewer) {
+        // Visionneuse image ouverte → juste fermer
+        viewer.remove();
+    } else if (currentCategory) {
+        // Menu ouvert → fermer avec animation
+        currentCategory = null;
+        closeMenuAnimation(() => initMainMenu());
+    } else {
+        // Cas fallback → rien à faire
+    }
+});
