@@ -242,7 +242,7 @@ function showDetail(dish) {
         card.appendChild(pAllerg);
     }
 
-    // Assemblage final de la card
+    // Assemblage final
     card.append(img, h3Name, pPrice);
     detail.appendChild(card);
 }
