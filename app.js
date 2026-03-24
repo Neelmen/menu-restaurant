@@ -234,7 +234,7 @@ function showDetail(dish) {
         pAllerg.innerHTML = "<b>Allergènes :</b> " + dish.allergens;
         card.appendChild(pAllerg);
     }
-});
+};
 card.append(img, h3Name, pPrice); // plus de backButton ici
 detail.appendChild(card);
     
