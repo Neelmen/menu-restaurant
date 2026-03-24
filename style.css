@@ -219,3 +219,13 @@ button, input, select, textarea {
     margin-top: 40px;
     margin-bottom: 10px;
 }
+/* ===============================
+   Bouton "Plus d'infos" sur les cards
+================================= */
+.card-info {
+    font-weight: bold;
+    color: #5a5a5a; /* neutre mais visible */
+    cursor: pointer;
+    margin-top: 8px;
+    text-align: center;
+}
