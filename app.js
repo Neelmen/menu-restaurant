@@ -212,10 +212,11 @@ function showDetail(dish) {
     const card = document.createElement("div");
     card.className = "card";
 
-    // Image
+    // Image avec arrondi
     const img = document.createElement("img");
     img.src = getImageUrlFromPath(dish.image_path);
     img.alt = dish.name;
+    img.style.borderRadius = "10px";  // <--- arrondi ajouté
 
     // Nom
     const h3Name = document.createElement("h3");
