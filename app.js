@@ -195,6 +195,9 @@ function showFullscreenImage(src) {
 function showDetail(dish) {
     const detail = document.getElementById("dish-detail");
     detail.classList.remove("hidden");
+    document.body.style.overflow = "hidden"; // bloque scroll du body
+    const detail = document.getElementById("dish-detail");
+    detail.classList.remove("hidden");
 
     // Vider le contenu précédent
     detail.innerHTML = "";
@@ -214,6 +217,13 @@ function showDetail(dish) {
         desc.innerHTML = "<b>Description :</b> " + dish.description;
         infoDiv.appendChild(desc);
     }
+
+    // Lors du clic sur retour
+document.getElementById("back-button-detail").addEventListener("click", () => {
+    const detail = document.getElementById("dish-detail");
+    detail.classList.add("hidden");
+    document.body.style.overflow = ""; // réactive scroll du body
+});
 
     if (dish.ingredients) {
         const ing = document.createElement("p");
