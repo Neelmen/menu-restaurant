@@ -26,23 +26,20 @@ function getImageUrlFromPath(imagePath) {
 // ================================
 async function showCategory(category) {
     if (currentCategory === category) {
-    // ferme le menu si on reclique dessus
     currentCategory = null;
 
     const container = document.getElementById("menu");
+    const cards = container.querySelectorAll(".card");
 
-    // Animation "remonte" avant de vider le menu
-    container.style.opacity = 1;
-    const fadeOut = container.animate([
-        { opacity: 1, transform: 'translateY(0)' },
-        { opacity: 0, transform: 'translateY(-20px)' }
-    ], {
-        duration: 300,
-        easing: 'ease-out',
-        fill: 'forwards'
+    // Animation des cartes qui "remontent"
+    cards.forEach((card, i) => {
+        card.style.transition = `opacity 0.3s ease ${i * 0.03}s, transform 0.3s ease ${i * 0.03}s`;
+        card.style.opacity = 0;
+        card.style.transform = 'translateY(-20px)';
     });
 
-    fadeOut.onfinish = () => {
+    // Après l'animation, vide le container
+    setTimeout(() => {
         container.innerHTML = "";
         document.getElementById("back-button").classList.add("hidden");
 
@@ -54,7 +51,6 @@ async function showCategory(category) {
         const nav = document.getElementById("navigation");
         nav.classList.add("no-hover");
 
-        // réactive le hover au prochain tap ou mouvement
         const reactivateHover = () => {
             nav.classList.remove("no-hover");
             window.removeEventListener("touchstart", reactivateHover);
@@ -65,8 +61,7 @@ async function showCategory(category) {
 
         // scroll smooth vers le haut
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
+    }, 300 + cards.length * 30); // durée totale = 300ms + délai par carte
     return;
 }
     currentCategory = category;
