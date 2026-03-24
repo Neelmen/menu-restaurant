@@ -209,7 +209,6 @@ function showDetail(dish) {
     detail.classList.remove("hidden");
     detail.innerHTML = "";
 
-    // Card zoomée
     const card = document.createElement("div");
     card.className = "card";
 
@@ -226,31 +225,26 @@ function showDetail(dish) {
     const pPrice = document.createElement("p");
     pPrice.textContent = dish.price + " €";
 
-    // Description
+    // Infos supplémentaires
     if (dish.description) {
         const pDesc = document.createElement("p");
         pDesc.innerHTML = "<b>Description :</b> " + dish.description;
         card.appendChild(pDesc);
     }
-
-    // Ingrédients
     if (dish.ingredients) {
         const pIng = document.createElement("p");
         pIng.innerHTML = "<b>Ingrédients :</b> " + dish.ingredients;
         card.appendChild(pIng);
     }
-
-    // Allergènes
     if (dish.allergens) {
-    const pAllerg = document.createElement("p");
-    pAllerg.innerHTML = "<b>Allergènes :</b> " + dish.allergens;
-    card.appendChild(pAllerg);
-}
+        const pAllerg = document.createElement("p");
+        pAllerg.innerHTML = "<b>Allergènes :</b> " + dish.allergens;
+        card.appendChild(pAllerg);
+    }
 
-// Assemblage final de la card
-card.append(img, h3Name, pPrice); // plus de backButton ici
-detail.appendChild(card);
-    
+    // Assemblage final de la card
+    card.append(img, h3Name, pPrice);
+    detail.appendChild(card);
 }
 
 // ================================
