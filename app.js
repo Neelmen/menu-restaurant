@@ -144,7 +144,7 @@ container.appendChild(title);
                 // Description
                 const pDesc = document.createElement("p");
                 if (dish.description) {
-                    pDesc.innerHTML = "<b>Déscription :</b> " + dish.description;
+                    pDesc.innerHTML = "<b>Description :</b> " + dish.description;
                 }
 
                 // Ingrédients
@@ -263,6 +263,7 @@ document.getElementById("back-button").addEventListener("click", () => {
         // sinon retourne au menu principal
         initMainMenu();
         document.getElementById("menu").innerHTML = "";
+        currentCategory = null;
     }
 });
 // ================================
