@@ -238,6 +238,7 @@ function initMainMenu() {
   { key: "plat", label: "PLATS" },
   { key: "dessert", label: "DESSERTS" },
   { key: "boisson", label: "BOISSONS" }
+  { key: "accompagnement", label: "ACCOMPAGNEMENTS" }
 ];
 
 categories.forEach(cat => {
