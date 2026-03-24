@@ -25,64 +25,33 @@ function getImageUrlFromPath(imagePath) {
 // Affiche la catégorie sélectionnée
 // ================================
 async function showCategory(category) {
-    if (currentCategory === category) {
-    currentCategory = null;
-    closeMenuAnimation();
-
     const container = document.getElementById("menu");
-    const cards = container.querySelectorAll(".card");
 
-    // Animation des cartes qui "remontent"
-    cards.forEach((card, i) => {
-        card.style.transition = `opacity 0.3s ease ${i * 0.03}s, transform 0.3s ease ${i * 0.03}s`;
-        card.style.opacity = 0;
-        card.style.transform = 'translateY(-20px)';
-    });
+    if (currentCategory === category) {
+        // reclique sur la catégorie → fermer le menu
+        currentCategory = null;
+        closeMenuAnimation();
+        return;
+    }
 
-    // Après l'animation, vide le container
-    setTimeout(() => {
-        container.innerHTML = "";
-        document.getElementById("back-button").classList.add("hidden");
-
-        // reset boutons actifs
-        const navButtons = document.querySelectorAll("#navigation button");
-        navButtons.forEach(btn => btn.classList.remove("active"));
-
-        // désactive temporairement le hover
-        const nav = document.getElementById("navigation");
-        nav.classList.add("no-hover");
-
-        const reactivateHover = () => {
-            nav.classList.remove("no-hover");
-            window.removeEventListener("touchstart", reactivateHover);
-            window.removeEventListener("mousemove", reactivateHover);
-        };
-        window.addEventListener("touchstart", reactivateHover);
-        window.addEventListener("mousemove", reactivateHover);
-
-        // scroll smooth vers le haut
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 300 + cards.length * 30); // durée totale = 300ms + délai par carte
-    return;
-}
     currentCategory = category;
+
+    // Scroll en haut avant affichage
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    const container = document.getElementById("menu");
     container.innerHTML = "";
 
-    // Boutons navigation
+    // Gestion boutons actifs
     document.querySelectorAll("#navigation button").forEach(btn => {
         btn.classList.toggle("active", btn.textContent.toLowerCase() === category);
     });
-
     document.getElementById("back-button").classList.remove("hidden");
 
     if (cache[category]) {
-    displayCategory(cache[category]);
-    scrollToMenu(); // <- ajoute cette ligne
-    return;
-}
+        displayCategory(cache[category]);
+        scrollToMenu();
+        return;
+    }
 
     // Récupération depuis Supabase
     const { data, error } = await client
@@ -99,14 +68,14 @@ async function showCategory(category) {
 
     // Regroupe par subcategory
     const grouped = data.reduce((acc, dish) => {
-    const sub = dish.subcategory && dish.subcategory.trim() !== "" 
-        ? dish.subcategory 
-        : "_no_sub"; // clé interne
+        const sub = dish.subcategory && dish.subcategory.trim() !== "" 
+            ? dish.subcategory 
+            : "_no_sub";
 
-    if (!acc[sub]) acc[sub] = [];
-    acc[sub].push(dish);
-    return acc;
-}, {});
+        if (!acc[sub]) acc[sub] = [];
+        acc[sub].push(dish);
+        return acc;
+    }, {});
 
     cache[category] = grouped;
     displayCategory(grouped);
@@ -120,70 +89,55 @@ function displayCategory(grouped) {
     const container = document.getElementById("menu");
     container.innerHTML = "";
 
-    // Tri des sous-catégories
-    // transformer en tableau pour trier
-const entries = Object.entries(grouped);
+    const entries = Object.entries(grouped);
+    const withSub = entries.filter(([key]) => key !== "_no_sub");
+    const noSub = entries.find(([key]) => key === "_no_sub");
 
-// séparer les sans sous-catégorie
-const withSub = entries.filter(([key]) => key !== "_no_sub");
-const noSub = entries.find(([key]) => key === "_no_sub");
+    withSub.sort((a, b) => b[1].length - a[1].length);
+    const sorted = noSub ? [...withSub, noSub] : withSub;
 
-// trier par nombre de plats (desc)
-withSub.sort((a, b) => b[1].length - a[1].length);
+    sorted.forEach(([sub, dishes]) => {
+        let displayName = sub === "_no_sub" ? (dishes.length > 1 ? "Autres" : "Autre") : sub;
 
-// reconstruire ordre final
-const sorted = noSub ? [...withSub, noSub] : withSub;
+        const title = document.createElement("h2");
+        title.textContent = displayName;
+        container.appendChild(title);
 
-sorted.forEach(([sub, dishes]) => {
-            let displayName = sub;
+        const groupDiv = document.createElement("div");
+        groupDiv.className = "category-group";
 
-if (sub === "_no_sub") {
-    displayName = dishes.length > 1 ? "Autres" : "Autre";
-}
-            const title = document.createElement("h2");
-title.textContent = displayName;
-container.appendChild(title);
-            const groupDiv = document.createElement("div");
-            groupDiv.className = "category-group";
+        dishes.forEach(dish => {
+            const card = document.createElement("div");
+            card.className = "card";
 
-            dishes.forEach(dish => {
-    const card = document.createElement("div");
-    card.className = "card";
+            const imageUrl = getImageUrlFromPath(dish.image_path);
+            const img = document.createElement("img");
+            img.loading = "lazy";
+            img.alt = dish.name;
+            img.src = imageUrl;
+            img.onerror = () => (img.style.display = "none");
 
-    // Image
-    const imageUrl = getImageUrlFromPath(dish.image_path);
-    const img = document.createElement("img");
-    img.loading = "lazy";
-    img.alt = dish.name;
-    img.src = imageUrl;
-    img.onerror = () => (img.style.display = "none");
+            const h3Name = document.createElement("h3");
+            h3Name.textContent = dish.name;
 
-    // Nom du plat
-    const h3Name = document.createElement("h3");
-    h3Name.textContent = dish.name;
+            const pPrice = document.createElement("p");
+            pPrice.textContent = dish.price + " €";
 
-    // Prix
-    const pPrice = document.createElement("p");
-    pPrice.textContent = dish.price + " €";
+            const pInfo = document.createElement("p");
+            pInfo.textContent = "Plus d'infos";
+            pInfo.style.fontWeight = "bold";
+            pInfo.style.color = "#444";
+            pInfo.style.cursor = "pointer";
 
-    // Plus d'infos
-    const pInfo = document.createElement("p");
-    pInfo.textContent = "Plus d'infos";
-    pInfo.style.fontWeight = "bold";
-    pInfo.style.color = "#444"; // couleur neutre mais visible
-    pInfo.style.cursor = "pointer";
+            card.append(img, h3Name, pPrice, pInfo);
 
-    // Assemblage de la carte
-    card.append(img, h3Name, pPrice, pInfo);
+            card.addEventListener("click", () => showDetail(dish));
 
-    // Au clic sur la card, ouvrir le détail avec image + infos
-    card.addEventListener("click", () => showDetail(dish));
-
-    groupDiv.appendChild(card);
-});
-
-            container.appendChild(groupDiv);
+            groupDiv.appendChild(card);
         });
+
+        container.appendChild(groupDiv);
+    });
 }
 
 // ================================
@@ -229,24 +183,19 @@ function showDetail(dish) {
     const card = document.createElement("div");
     card.className = "card";
 
-    // Image avec arrondi
     const img = document.createElement("img");
     img.src = getImageUrlFromPath(dish.image_path);
     img.alt = dish.name;
-    img.style.borderRadius = "10px";  // <--- arrondi ajouté
+    img.style.borderRadius = "10px";
 
-    // Nom
     const h3Name = document.createElement("h3");
     h3Name.textContent = dish.name;
 
-    // Prix
     const pPrice = document.createElement("p");
     pPrice.textContent = dish.price + " €";
 
-    // Assemblage principal : image + nom + prix
     card.append(img, h3Name, pPrice);
 
-    // Infos supplémentaires en dessous
     if (dish.description) {
         const pDesc = document.createElement("p");
         pDesc.innerHTML = "<b>Description :</b> " + dish.description;
@@ -267,7 +216,7 @@ function showDetail(dish) {
 }
 
 // ================================
-// Fermeture fiche détail
+// Fermeture fiche détail (click overlay)
 // ================================
 const detail = document.getElementById("dish-detail");
 if (detail) {
@@ -296,73 +245,51 @@ function initMainMenu() {
 }
 
 // ================================
-// Bouton retour
+// Animation scroll + apparition cartes
 // ================================
-document.getElementById("back-button").addEventListener("click", () => {
-    const detail = document.getElementById("dish-detail");
-    const viewer = document.getElementById("image-viewer");
-
-    if (detail && !detail.classList.contains("hidden")) {
-        // ferme la fiche détaillée
-        detail.classList.add("hidden");
-    } else if (viewer) {
-        // ferme la visionneuse d'image
-        viewer.remove();
-    } else {
-        // sinon retourne au menu principal
-        initMainMenu();
-        document.getElementById("menu").innerHTML = "";
-        currentCategory = null;
-    }
-});
-// ================================
-// Lancement
-// ================================
-document.addEventListener("DOMContentLoaded", () => {
-    initMainMenu();
-});
 function scrollToMenu() {
     const container = document.getElementById("menu");
     container.scrollIntoView({ 
         behavior: "smooth", 
-        block: "start" // aligne le haut du container en haut de l'écran
+        block: "start"
     });
 
-    // Animation des cartes
     const cards = container.querySelectorAll(".card");
     cards.forEach((card, i) => {
         card.style.opacity = 0;
         card.style.transform = "translateY(20px)";
         card.style.transition = `opacity 0.4s ease ${i * 0.05}s, transform 0.4s ease ${i * 0.05}s`;
-        // déclenche l'animation après un petit délai
         requestAnimationFrame(() => {
             card.style.opacity = 1;
             card.style.transform = "translateY(0)";
         });
     });
 }
-// Fonction pour fermer le menu avec animation
+
+// ================================
+// Fermer menu avec animation
+// ================================
 function closeMenuAnimation(callback) {
     const container = document.getElementById("menu");
-    container.style.opacity = 1;
-    const anim = container.animate([
-        { opacity: 1, transform: 'translateY(0)' },
-        { opacity: 0, transform: 'translateY(-20px)' }
-    ], {
-        duration: 300,
-        easing: 'ease-out',
-        fill: 'forwards'
+    const cards = container.querySelectorAll(".card");
+
+    // Scroll doucement vers le haut
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    cards.forEach((card, i) => {
+        card.style.transition = `opacity 0.3s ease ${i * 0.03}s, transform 0.3s ease ${i * 0.03}s`;
+        card.style.opacity = 0;
+        card.style.transform = 'translateY(-20px)';
     });
 
-    anim.onfinish = () => {
+    // Supprime après l'animation
+    setTimeout(() => {
         container.innerHTML = "";
         document.getElementById("back-button").classList.add("hidden");
 
-        // Reset boutons actifs
         const navButtons = document.querySelectorAll("#navigation button");
         navButtons.forEach(btn => btn.classList.remove("active"));
 
-        // Gestion hover
         const nav = document.getElementById("navigation");
         nav.classList.add("no-hover");
         const reactivateHover = () => {
@@ -373,28 +300,30 @@ function closeMenuAnimation(callback) {
         window.addEventListener("touchstart", reactivateHover);
         window.addEventListener("mousemove", reactivateHover);
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
         if (callback) callback();
-    };
+    }, 300 + cards.length * 30);
 }
 
-// Gestion bouton retour
+// ================================
+// Bouton retour
+// ================================
 document.getElementById("back-button").addEventListener("click", () => {
     const detail = document.getElementById("dish-detail");
     const viewer = document.getElementById("image-viewer");
 
     if (detail && !detail.classList.contains("hidden")) {
-        // Fiche zoomée ouverte → juste fermer la carte
         detail.classList.add("hidden");
     } else if (viewer) {
-        // Visionneuse image ouverte → juste fermer
         viewer.remove();
     } else if (currentCategory) {
-        // Menu ouvert → fermer avec animation
         currentCategory = null;
         closeMenuAnimation(() => initMainMenu());
-    } else {
-        // Cas fallback → rien à faire
     }
+});
+
+// ================================
+// Lancement
+// ================================
+document.addEventListener("DOMContentLoaded", () => {
+    initMainMenu();
 });
