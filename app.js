@@ -234,13 +234,6 @@ function showDetail(dish) {
         pAllerg.innerHTML = "<b>Allergènes :</b> " + dish.allergens;
         card.appendChild(pAllerg);
     }
-
-    // Bouton retour
-const backButton = document.createElement("button");
-backButton.textContent = "Retour";
-backButton.style.marginTop = "15px";
-backButton.addEventListener("click", () => {
-    detail.classList.add("hidden");
 });
 card.append(img, h3Name, pPrice); // plus de backButton ici
 detail.appendChild(card);
