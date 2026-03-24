@@ -233,13 +233,19 @@ function initMainMenu() {
     const nav = document.getElementById("navigation");
     nav.innerHTML = "";
 
-    const categories = ["entree", "plat", "dessert", "boisson"];
-    categories.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.textContent = cat.toUpperCase();
-        btn.addEventListener("click", () => showCategory(cat));
-        nav.appendChild(btn);
-    });
+    const categories = [
+  { key: "entree", label: "ENTRÉES" },
+  { key: "plat", label: "PLATS" },
+  { key: "dessert", label: "DESSERTS" },
+  { key: "boisson", label: "BOISSONS" }
+];
+
+categories.forEach(cat => {
+  const btn = document.createElement("button");
+  btn.textContent = cat.label;
+  btn.addEventListener("click", () => showCategory(cat.key));
+  nav.appendChild(btn);
+});
 
     document.getElementById("back-button").classList.add("hidden");
 }
