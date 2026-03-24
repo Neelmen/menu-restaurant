@@ -230,11 +230,12 @@ function showDetail(dish) {
 
     // Allergènes
     if (dish.allergens) {
-        const pAllerg = document.createElement("p");
-        pAllerg.innerHTML = "<b>Allergènes :</b> " + dish.allergens;
-        card.appendChild(pAllerg);
-    }
-};
+    const pAllerg = document.createElement("p");
+    pAllerg.innerHTML = "<b>Allergènes :</b> " + dish.allergens;
+    card.appendChild(pAllerg);
+}
+
+// Assemblage final de la card
 card.append(img, h3Name, pPrice); // plus de backButton ici
 detail.appendChild(card);
     
