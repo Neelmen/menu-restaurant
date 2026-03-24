@@ -196,8 +196,6 @@ function showDetail(dish) {
     const detail = document.getElementById("dish-detail");
     detail.classList.remove("hidden");
     document.body.style.overflow = "hidden"; // bloque scroll du body
-    const detail = document.getElementById("dish-detail");
-    detail.classList.remove("hidden");
 
     // Vider le contenu précédent
     detail.innerHTML = "";
@@ -208,22 +206,17 @@ function showDetail(dish) {
 
     const name = document.createElement("h2");
     name.textContent = dish.name;
+    infoDiv.appendChild(name);
 
     const price = document.createElement("p");
     price.textContent = dish.price + " €";
+    infoDiv.appendChild(price);
 
     if (dish.description) {
         const desc = document.createElement("p");
         desc.innerHTML = "<b>Description :</b> " + dish.description;
         infoDiv.appendChild(desc);
     }
-
-    // Lors du clic sur retour
-document.getElementById("back-button-detail").addEventListener("click", () => {
-    const detail = document.getElementById("dish-detail");
-    detail.classList.add("hidden");
-    document.body.style.overflow = ""; // réactive scroll du body
-});
 
     if (dish.ingredients) {
         const ing = document.createElement("p");
@@ -242,7 +235,10 @@ document.getElementById("back-button-detail").addEventListener("click", () => {
     backButton.id = "back-button-detail";
     backButton.textContent = "Retour";
     backButton.style.marginTop = "20px";
-    backButton.addEventListener("click", () => detail.classList.add("hidden"));
+    backButton.addEventListener("click", () => {
+        detail.classList.add("hidden");
+        document.body.style.overflow = ""; // réactive scroll du body
+    });
     infoDiv.appendChild(backButton);
 
     // Créer colonne image
