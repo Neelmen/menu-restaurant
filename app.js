@@ -192,7 +192,15 @@ function showDetail(dish) {
     h3Name.textContent = dish.name;
 
     const pPrice = document.createElement("p");
+    if (dish.category === "accompagnement") {
+    pPrice.textContent = "Compris avec le plat";
+} else {
+    if (dish.category === "accompagnement") {
+    pPrice.textContent = "Compris avec le plat";
+} else {
     pPrice.textContent = dish.price + " €";
+}
+}
 
     card.append(img, h3Name, pPrice);
 
