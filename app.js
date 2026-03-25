@@ -233,7 +233,7 @@ function initMainMenu() {
     const nav = document.getElementById("navigation");
     nav.innerHTML = "";
 
-    const categories = ["entree", "plat", "dessert", "boisson"];
+    const categories = ["entree", "plat", "accompagnement", "dessert", "boisson"];
     categories.forEach(cat => {
         const btn = document.createElement("button");
         btn.textContent = cat.toUpperCase();
