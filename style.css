@@ -244,14 +244,15 @@ button, input, select, textarea {
     color: #333 !important;
 }
 
-/* Import d'une police élégante pour le style restaurant */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
-
+/*Le texte TITRE avec effet du menu*/
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,700&display=swap');
 .logo-text {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Cormorant Garamond', serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
     font-size: 2rem;
     font-weight: bold;
-    font-style: italic;
+    font-style: none;
     color: #333; /* Couleur de base du texte */
     text-align: center;
     margin-bottom: 20px;
