@@ -289,14 +289,15 @@ function addRippleEffect() {
 ///animation de scroll pour l'ouverture du menu
 function scrollToMenu() {
     const container = document.getElementById("menu");
-    
-    const yOffset = -120; // Ajuster le nombre pour avoir + ou - de scroll
-    const y = container.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    const containerTop = container.getBoundingClientRect().top + window.pageYOffset;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const y = Math.min(containerTop + 50, maxScroll); // 50px de marge pour descendre plus bas
 
     window.scrollTo({
         top: y,
         behavior: "smooth"
     });
+
     const cards = container.querySelectorAll(".card");
     cards.forEach((card, i) => {
         card.style.opacity = 0;
