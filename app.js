@@ -275,6 +275,31 @@ function initMainMenu() {
     document.getElementById("back-button").classList.add("hidden");
 }
 
+function addRippleEffect() {
+    document.addEventListener("click", function (e) {
+        const button = e.target.closest("#navigation button");
+        if (!button) return;
+
+        const ripple = document.createElement("span");
+        ripple.classList.add("ripple");
+
+        const rect = button.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+
+        ripple.style.width = ripple.style.height = size + "px";
+        ripple.style.left = (e.clientX - rect.left - size / 2) + "px";
+        ripple.style.top = (e.clientY - rect.top - size / 2) + "px";
+
+        button.appendChild(ripple);
+
+        setTimeout(() => ripple.remove(), 600);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    addRippleEffect();
+});
+
 ///animation de scroll pour l'ouverture du menu
 function scrollToMenu() {
     const container = document.getElementById("menu");
